@@ -1,6 +1,6 @@
 # hass-anchor-card
-An anchor (scroll to) card!
-> There is currently no way to scroll to specific points in your dashboard. This card acts as an anchor you can scroll to.
+An anchor (scroll to) card for Home Assistant!
+> There is currently no way to scroll to specific points in your dashboard. This card fixes this and acts as an anchor you can scroll to.
 
 *made with the help of the [zupre](https://github.com/dangreco/zupre) template*
 
@@ -28,13 +28,21 @@ Here's an example configuration for the `hass-anchor-card`:
 
 ```yaml
 type: "custom:hass-anchor-card"
-anchor_id: "lights"
-negative_margin: "10px"
-timeout: "200ms"
-offset: "-5"
+anchor_id: lights
+negative_margin: 10px
+timeout: 200ms
+offset: -5
 ```
 
 Replace the values in the example with your desired settings, and add the card to your Lovelace dashboard.
+
+### Compatibility
+
+The card was tested using the default Dashboard layout. Other layouts might not work as this card is dependent on its parent.
+When checking whether to scroll or not, the card looks at each time the visibility of the column it is in changes (from not visible to visible).
+
+You can fork, modify the source code and build the JS bundle yourself (using `npm run build`) to optimize for other custom layouts if necessary.
+The method that finds the big enough parent unique to the card can be found in `src/index` `AnchorCard#getCardColumn`. Modify the condition(s) on line 21.
 
 ## Installation
 
