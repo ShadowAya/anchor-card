@@ -36,13 +36,14 @@ offset: -5
 
 Replace the values in the example with your desired settings, and add the card to your Lovelace dashboard.
 
-### Compatibility
+## Compatibility
 
-The card was tested using the default Dashboard layout. Other layouts might not work as this card is dependent on its parent.
-When checking whether to scroll or not, the card looks at each time the visibility of the column it is in changes (from not visible to visible).
+The card was tested on the default Dashboard layout. If your testing finds a third-party layout to be incompatible, you have to fork the repo and make the following changes:
+ - locate `AnchorCard#getCardColumn` in `src/index.tsx`
+ - refer to the comments for assistance and explanation (TLDR: the card has to find and use its parent to determine if it's on the current dashboard and should scroll)
+The default implementation takes an element with class "column" as a parent, has a max search depth of 20, and should ignore the edit dialog.
 
-You can fork, modify the source code and build the JS bundle yourself (using `npm run build`) to optimize for other custom layouts if necessary.
-The method that finds the big enough parent unique to the card can be found in `src/index` `AnchorCard#getCardColumn`. Modify the condition(s) on line 21.
+If you need assistance, you can contact me on Discord at `shadow_aya`, I'm happy to help if you're lost.
 
 ## Installation
 
