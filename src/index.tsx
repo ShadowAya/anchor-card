@@ -184,6 +184,9 @@ class AnchorCard extends HTMLElement {
                 <li>
                   strict_url_change - set to true to only scroll when the url changes.
                 </li>
+                <li>
+                  disable_in_edit_mode - prevent scrolling when edit=1.
+                </li>
               </ul>
             )}
             { /* @ts-ignore */ }
