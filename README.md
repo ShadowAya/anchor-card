@@ -1,5 +1,9 @@
 # hass-anchor-card
 An anchor (scroll to) card for Home Assistant!
+<p align="center">
+  <img src="https://cdn.discordapp.com/attachments/1147253453886853200/1150587188849938543/ezgif.com-optimize_3.gif" alt="Preview" height="600px">
+</p>
+
 > There is currently no way to scroll to specific points in your dashboard. This card fixes this and acts as an anchor you can scroll to.
 
 *made with the help of the [zupre](https://github.com/dangreco/zupre) template*
