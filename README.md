@@ -42,12 +42,12 @@ Replace the values in the example with your desired settings, and add the card t
 
 ## Compatibility
 
-The card was tested on the default Dashboard layout. If your testing finds a third-party layout to be incompatible, you have to fork the repo and make the following changes:
- - locate `AnchorCard#getCardColumn` in `src/index.tsx`
- - refer to the comments for assistance and explanation (TLDR: the card has to find and use its parent to determine if it's on the current dashboard and should scroll)
-The default implementation takes an element with class "column" as a parent, has a max search depth of 20, and should ignore the edit dialog.
+~~The card was tested on the default Dashboard layout. If your testing finds a third-party layout to be incompatible, you have to fork the repo and make the following changes:~~
+ - ~~locate `AnchorCard#getCardColumn` in `src/index.tsx`~~
+ - ~~refer to the comments for assistance and explanation (TLDR: the card has to find and use its parent to determine if it's on the current dashboard and should scroll)~~
+~~The default implementation takes an element with class "column" as a parent, has a max search depth of 20, and should ignore the edit dialog.~~
 
-If you need assistance, you can contact me on Discord at `shadow_aya`, I'm happy to help if you're lost.
+In v2, the card doesn't rely on its parent anymore.
 
 ## Installation
 
