@@ -93,10 +93,10 @@ class AnchorCard extends HTMLElement {
       const checkLocationChange = debounce(() => {
         const newUrl = window.location.href;
 
-        if (!(this.config.disable_in_edit_mode !== false)) {
-          const params = new URLSearchParams(window.location.search);
-          if (params.get('edit') === '1') return;
-        }
+        if (
+          this.config.disable_in_edit_mode !== false
+          && window.location.search.includes('edit=1')
+        ) return;
 
         if (this.config.strict_url_change && (newUrl === this.lastUrl)) return;
 
@@ -201,7 +201,7 @@ class AnchorCard extends HTMLElement {
   }
 }
 
-customElements.define('anchor-card', AnchorCard);
+customElements.define('anchor-card-dev', AnchorCard);
 
 declare global {
   // eslint-disable-next-line no-unused-vars
@@ -212,8 +212,8 @@ declare global {
 
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type: 'anchor-card',
-  name: 'Anchor Card',
+  type: 'anchor-card-dev',
+  name: 'Anchor Card dev',
   preview: false,
   description: 'A card that acts as a scroll anchor',
 });
