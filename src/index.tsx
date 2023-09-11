@@ -91,8 +91,13 @@ class AnchorCard extends HTMLElement {
   connectedCallback() {
     (() => {
       const checkLocationChange = debounce(() => {
-        window.dispatchEvent(new Event('locationchange'));
         const newUrl = window.location.href;
+
+        if (!(this.config.disable_in_edit_mode !== false)) {
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('edit') === '1') return;
+        }
+
         if (this.config.strict_url_change && (newUrl !== this.lastUrl)) {
           window.dispatchEvent(new Event('locationchange'));
           this.lastUrl = newUrl;
@@ -127,6 +132,8 @@ class AnchorCard extends HTMLElement {
         this.scrollToAnchor();
       });
     });
+
+    window.dispatchEvent(new Event('locationchange'));
   }
 
   disconnectedCallback() {
