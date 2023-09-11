@@ -5,4 +5,5 @@ export type Config = {
   offset?: number;
   negative_margin?: number;
   timeout?: number;
+  strict_url_change?: boolean;
 }
