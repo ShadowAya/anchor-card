@@ -98,10 +98,10 @@ class AnchorCard extends HTMLElement {
           if (params.get('edit') === '1') return;
         }
 
-        if (this.config.strict_url_change && (newUrl !== this.lastUrl)) {
-          window.dispatchEvent(new Event('locationchange'));
-          this.lastUrl = newUrl;
-        }
+        if (this.config.strict_url_change && (newUrl === this.lastUrl)) return;
+
+        window.dispatchEvent(new Event('locationchange'));
+        this.lastUrl = newUrl;
       }, 100);
 
       const oldPushState = window.history.pushState;
