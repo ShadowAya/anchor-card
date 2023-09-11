@@ -6,7 +6,7 @@ An anchor (scroll to) card for Home Assistant!
 
 ## Usage
 
-To use the `hass-anchor-card`, you need to configure it with the following parameters:
+To use the `anchor-card`, you need to configure it with the following parameters:
 
 1. **anchor_id**: An identifier unique to each page.
    - This allows you to scroll directly to this card by using the URL parameter `anchor`.
@@ -24,10 +24,10 @@ To use the `hass-anchor-card`, you need to configure it with the following param
 
 ### Configuration Example:
 
-Here's an example configuration for the `hass-anchor-card`:
+Here's an example configuration for the `anchor-card`:
 
 ```yaml
-type: "custom:hass-anchor-card"
+type: "custom:anchor-card"
 anchor_id: lights
 negative_margin: 10px
 timeout: 200ms
