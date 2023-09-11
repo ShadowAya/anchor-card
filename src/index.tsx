@@ -201,7 +201,7 @@ class AnchorCard extends HTMLElement {
   }
 }
 
-customElements.define('anchor-card-dev', AnchorCard);
+customElements.define('anchor-card', AnchorCard);
 
 declare global {
   // eslint-disable-next-line no-unused-vars
@@ -212,8 +212,8 @@ declare global {
 
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type: 'anchor-card-dev',
-  name: 'Anchor Card dev',
+  type: 'anchor-card',
+  name: 'Anchor Card',
   preview: false,
   description: 'A card that acts as a scroll anchor',
 });
