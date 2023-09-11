@@ -1,4 +1,4 @@
-# hass-anchor-card
+# anchor-card
 An anchor (scroll to) card for Home Assistant!
 <p align="center">
   <img src="https://cdn.discordapp.com/attachments/1147253453886853200/1150587188849938543/ezgif.com-optimize_3.gif" alt="Preview" height="600px">
