@@ -26,6 +26,12 @@ To use the `anchor-card`, you need to configure it with the following parameters
 4. **offset**: Determines the scroll offset.
    - Default value: `0`. It can also be set to a negative value to adjust the position as well.
 
+5. **strict_url_change**: Set to true to only scroll when the url changes.
+   - Default value: `false`
+
+6. **disable_in_edit_mode**: Set to true to prevent scrolling when edit=1
+   - Default value: `true`
+
 ### Configuration Example:
 
 Here's an example configuration for the `anchor-card`:
