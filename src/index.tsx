@@ -6,10 +6,23 @@
 import { render } from 'preact';
 import { Config } from 'types';
 
+function debounce(func: Function, delay = 100) {
+  // eslint-disable-next-line no-undef
+  let timeoutId: NodeJS.Timeout;
+  return (...args: any) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func.apply(this, args);
+    }, delay);
+  };
+}
+
 class AnchorCard extends HTMLElement {
   private config: Config;
 
-  private _observer: IntersectionObserver | null = null;
+  private lastUrl: string | null = null;
+
+  handlePopState: () => void;
 
   getCardColumn(): HTMLElement | null {
     let element: HTMLElement | null = this;
@@ -76,25 +89,54 @@ class AnchorCard extends HTMLElement {
   }
 
   connectedCallback() {
-    const columnElement = this.getCardColumn();
-    if (!this._observer && columnElement) {
-      this._observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            this.scrollToAnchor();
-          }
-        });
-      });
+    (() => {
+      const checkLocationChange = debounce(() => {
+        window.dispatchEvent(new Event('locationchange'));
+        const newUrl = window.location.href;
+        if (this.config.strict_url_change && (newUrl !== this.lastUrl)) {
+          window.dispatchEvent(new Event('locationchange'));
+          this.lastUrl = newUrl;
+        }
+      }, 100);
 
-      this._observer.observe(columnElement);
-    }
+      const oldPushState = window.history.pushState;
+      window.history.pushState = function pushState(...args) {
+        const ret = oldPushState.apply(this, args);
+        window.dispatchEvent(new Event('pushstate'));
+        checkLocationChange(); // Check for URL change
+        return ret;
+      };
+
+      const oldReplaceState = window.history.replaceState;
+      window.history.replaceState = function replaceState(...args) {
+        const ret = oldReplaceState.apply(this, args);
+        window.dispatchEvent(new Event('replacestate'));
+        checkLocationChange(); // Check for URL change
+        return ret;
+      };
+
+      this.handlePopState = () => {
+        checkLocationChange();
+      };
+
+      window.addEventListener('popstate', this.handlePopState);
+    })();
+
+    window.addEventListener('locationchange', () => {
+      requestAnimationFrame(() => {
+        this.scrollToAnchor();
+      });
+    });
   }
 
   disconnectedCallback() {
-    if (this._observer) {
-      this._observer.disconnect();
-      this._observer = null;
-    }
+    window.removeEventListener('locationchange', () => {
+      requestAnimationFrame(() => {
+        this.scrollToAnchor();
+      });
+    });
+
+    window.removeEventListener('popstate', this.handlePopState);
   }
 
   setConfig(config: any) {
@@ -132,6 +174,9 @@ class AnchorCard extends HTMLElement {
                 <li>
                   offset - the scroll offset. default is 0. can be a negative value.
                 </li>
+                <li>
+                  strict_url_change - set to true to only scroll when the url changes.
+                </li>
               </ul>
             )}
             { /* @ts-ignore */ }
@@ -146,7 +191,7 @@ class AnchorCard extends HTMLElement {
   }
 }
 
-customElements.define('anchor-card', AnchorCard);
+customElements.define('anchor-card-dev', AnchorCard);
 
 declare global {
   // eslint-disable-next-line no-unused-vars
@@ -157,8 +202,8 @@ declare global {
 
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type: 'anchor-card',
-  name: 'Anchor Card',
+  type: 'anchor-card-dev',
+  name: 'Anchor Card dev',
   preview: false,
   description: 'A card that acts as a scroll anchor',
 });
