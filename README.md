@@ -21,7 +21,7 @@ To use the `anchor-card`, you need to configure it with the following parameters
 
 3. **timeout**: Specifies the waiting time before scrolling to the card.
    - Useful in cases where other cards might take longer to render.
-   - Default value: `150ms`.
+   - Default value: `150` (in ms).
 
 4. **offset**: Determines the scroll offset.
    - Default value: `0`. It can also be set to a negative value to adjust the position as well.
