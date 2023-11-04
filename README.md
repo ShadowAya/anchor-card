@@ -32,6 +32,9 @@ To use the `anchor-card`, you need to configure it with the following parameters
 6. **disable_in_edit_mode**: Set to true to prevent scrolling when edit=1
    - Default value: `true`
 
+7. **remove_anchor**: Set to true to remove the anchor from the url after scrolling to it.
+   - Default value: `true`
+
 ### Configuration Example:
 
 Here's an example configuration for the `anchor-card`:
@@ -45,15 +48,6 @@ offset: -5
 ```
 
 Replace the values in the example with your desired settings, and add the card to your Lovelace dashboard.
-
-## Compatibility
-
-~~The card was tested on the default Dashboard layout. If your testing finds a third-party layout to be incompatible, you have to fork the repo and make the following changes:~~
- - ~~locate `AnchorCard#getCardColumn` in `src/index.tsx`~~
- - ~~refer to the comments for assistance and explanation (TLDR: the card has to find and use its parent to determine if it's on the current dashboard and should scroll)~~
-~~The default implementation takes an element with class "column" as a parent, has a max search depth of 20, and should ignore the edit dialog.~~
-
-In v2, the card doesn't rely on its parent anymore.
 
 ## Installation
 

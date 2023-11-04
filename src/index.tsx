@@ -42,6 +42,14 @@ class AnchorCard extends HTMLElement {
           top: rect.top + scrollTop + offset,
           behavior: 'smooth',
         });
+
+        if (this.config.remove_anchor !== false) {
+          // Remove anchor param from url
+          urlParams.delete('anchor');
+          const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?${urlParams}`;
+
+          window.history.replaceState({}, '', newUrl);
+        }
       }
     }, this.config.timeout || 150);
   }
@@ -66,7 +74,7 @@ class AnchorCard extends HTMLElement {
       window.history.pushState = function pushState(...args) {
         const ret = oldPushState.apply(this, args);
         window.dispatchEvent(new Event('pushstate'));
-        checkLocationChange(); // Check for URL change
+        checkLocationChange();
         return ret;
       };
 
@@ -74,7 +82,7 @@ class AnchorCard extends HTMLElement {
       window.history.replaceState = function replaceState(...args) {
         const ret = oldReplaceState.apply(this, args);
         window.dispatchEvent(new Event('replacestate'));
-        checkLocationChange(); // Check for URL change
+        checkLocationChange();
         return ret;
       };
 
@@ -144,6 +152,10 @@ class AnchorCard extends HTMLElement {
                 </li>
                 <li>
                   disable_in_edit_mode - prevent scrolling when edit=1.
+                </li>
+                <li>
+                  remove_anchor - removes the anchor param from the url after scrolling.
+                  default is true.
                 </li>
               </ul>
             )}
