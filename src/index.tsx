@@ -24,48 +24,6 @@ class AnchorCard extends HTMLElement {
 
   handlePopState: () => void;
 
-  getCardColumn(): HTMLElement | null {
-    let element: HTMLElement | null = this;
-    let depth = 0;
-    /*
-    * Modify this if you want to limit the depth of the search.
-    */
-    const MAX_DEPTH = 20;
-
-    while (element && depth < MAX_DEPTH) {
-      if (element instanceof ShadowRoot) {
-        element = element.host as HTMLElement;
-      }
-      if (
-        /*
-        * Modify this if you want to stop the card from scrolling in certain cases.
-        * HUI-DIALOG-EDIT-CARD included by default to prevent scrolling in config mode.
-        */
-        element.tagName === 'HUI-DIALOG-EDIT-CARD'
-      ) {
-        return null;
-      }
-      if (
-        /*
-        * Modify this to match the biggest parent unique to the card.
-        * The parent should ideally be always visible.
-        * The card uses the parent to determine when the visible dashboard changes.
-        * The parent CANNOT:
-        *  - be too small to ever come out of view on scroll (e.g. a small stack card)
-        *  - stay the same between dashboards (e.g. <hui-masonry-view>)
-        */
-        element.classList?.contains('column')
-      ) {
-        return element;
-      }
-      element = element.parentElement || element.getRootNode() as HTMLElement;
-      // eslint-disable-next-line no-plusplus
-      depth++;
-    }
-
-    return null;
-  }
-
   scrollToAnchor() {
     setTimeout(() => {
       const anchorId = this.config.anchor_id;
