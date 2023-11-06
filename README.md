@@ -1,7 +1,7 @@
 # anchor-card
 An anchor (scroll to) card for Home Assistant!
 <p align="center">
-  <img src="https://cdn.discordapp.com/attachments/1147253453886853200/1150587188849938543/ezgif.com-optimize_3.gif" alt="Preview" height="600px">
+  <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExaTM1bGhlMWt0aHlhdG4wd3cycGdxY3UzYTlhaG5rbThjMnl2dHRpdCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/kMzSlpnnCpINj6YBMw/giphy.gif" alt="Preview" height="600px">
 </p>
 
 > There is currently no way to scroll to specific points in your dashboard. This card fixes this and acts as an anchor you can scroll to.
@@ -53,12 +53,32 @@ Replace the values in the example with your desired settings, and add the card t
 
 Follow these steps to install and use the `anchor-card` in your Home Assistant setup:
 
-### Step 1: Download the Card
+### HACS
+
+#### Step 1: Add custom repository
+
+1. Open HACS > Frontend
+2. Go to the **Custom Repositories** tab (top right)
+3. Fill out a new repo
+
+   a. **Repository:** `https://github.com/ShadowAya/anchor-card`
+
+   b. **Category:** Lovelace
+   
+6. Add
+
+#### Step 2: Download the card
+
+Download the card via the newly added repository
+
+### Manual
+
+#### Step 1: Download the Card
 
 1. Navigate to the [releases section](https://github.com/ShadowAya/anchor-card/releases/latest).
 2. Download the latest release.
 
-### Step 2: Add the Card to Home Assistant
+#### Step 2: Add the Card to Home Assistant
 
 1. Upload the downloaded `anchor-card.js` file to your Home Assistant configuration directory or any subdirectory of your choice. A common directory might be `/config/www`.
 
@@ -80,6 +100,6 @@ Follow these steps to install and use the `anchor-card` in your Home Assistant s
 
    g. Click on the **Create** button to add the resource.
 
-### Step 3: Verify Installation
+#### Step 3: Verify Installation
 
 Now that you've added the card as a resource, it should be available for use in your Lovelace dashboards. When creating or editing a dashboard, you should be able to add the `anchor-card` by its custom card type, e.g., `"custom:anchor-card"`.
