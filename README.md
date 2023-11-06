@@ -8,6 +8,12 @@ An anchor (scroll to) card for Home Assistant!
 
 *made with the help of the [zupre](https://github.com/dangreco/zupre) template*
 
+### Known issues
+
+When navigating within the same page, a new entry for the same URL gets pushed into history. It's not possible to remove history entries, so the same page URL will appear in your history multiple times.
+
+Example: when you navigate to "kitchen" and then to "kitchen - lights" and then "kitchen - covers", you'll have to go back three times to leave the "kitchen" page, instead of one
+
 ## Usage
 
 To use the `anchor-card`, you need to configure it with the following parameters:
