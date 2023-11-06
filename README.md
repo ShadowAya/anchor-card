@@ -14,6 +14,8 @@ When navigating within the same page, a new entry for the same URL gets pushed i
 
 Example: when you navigate to "kitchen" and then to "kitchen - lights" and then "kitchen - covers", you'll have to go back three times to leave the "kitchen" page, instead of one
 
+I am currently working on a workaround
+
 ## Usage
 
 To use the `anchor-card`, you need to configure it with the following parameters:
