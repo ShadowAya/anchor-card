@@ -18,6 +18,11 @@ function debounce(func: Function, delay = 100) {
 }
 
 class AnchorCard extends HTMLElement {
+  constructor() {
+    super();
+    this.scrollToAnchor = this.scrollToAnchor.bind(this);
+  }
+
   private config: Config;
 
   private lastUrl: string | null = null;
