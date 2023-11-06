@@ -25,33 +25,35 @@ class AnchorCard extends HTMLElement {
   handlePopState: () => void;
 
   scrollToAnchor() {
-    setTimeout(() => {
-      const anchorId = this.config.anchor_id;
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        const anchorId = this.config.anchor_id;
 
-      const urlParams = new URLSearchParams(window.location.search);
-      const anchorParam = urlParams.get('anchor');
+        const urlParams = new URLSearchParams(window.location.search);
+        const anchorParam = urlParams.get('anchor');
 
-      if (anchorParam && anchorParam === anchorId) {
-        // Get current position
-        const rect = this.getBoundingClientRect();
-        const offset = this.config.offset || 0;
-        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        if (anchorParam && anchorParam === anchorId) {
+          // Get current position
+          const rect = this.getBoundingClientRect();
+          const offset = this.config.offset || 0;
+          const scrollTop = window.scrollY || document.documentElement.scrollTop;
 
-        // Smooth scroll to the calculated position
-        window.scrollTo({
-          top: rect.top + scrollTop + offset,
-          behavior: 'smooth',
-        });
+          // Smooth scroll to the calculated position
+          window.scrollTo({
+            top: rect.top + scrollTop + offset,
+            behavior: 'smooth',
+          });
 
-        if (this.config.remove_anchor !== false) {
-          // Remove anchor param from url
-          urlParams.delete('anchor');
-          const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?${urlParams}`;
+          if (this.config.remove_anchor !== false) {
+            // Remove anchor param from url
+            urlParams.delete('anchor');
+            const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?${urlParams}`;
 
-          window.history.replaceState({}, '', newUrl);
+            window.history.replaceState({}, '', newUrl);
+          }
         }
-      }
-    }, this.config.timeout || 150);
+      }, this.config.timeout || 150);
+    });
   }
 
   connectedCallback() {
@@ -93,21 +95,13 @@ class AnchorCard extends HTMLElement {
       window.addEventListener('popstate', this.handlePopState);
     })();
 
-    window.addEventListener('locationchange', () => {
-      requestAnimationFrame(() => {
-        this.scrollToAnchor();
-      });
-    });
+    window.addEventListener('locationchange', this.scrollToAnchor);
 
     window.dispatchEvent(new Event('locationchange'));
   }
 
   disconnectedCallback() {
-    window.removeEventListener('locationchange', () => {
-      requestAnimationFrame(() => {
-        this.scrollToAnchor();
-      });
-    });
+    window.removeEventListener('locationchange', this.scrollToAnchor);
 
     window.removeEventListener('popstate', this.handlePopState);
   }
