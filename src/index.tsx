@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 /* eslint-disable brace-style */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable react/jsx-no-constructed-context-values */
