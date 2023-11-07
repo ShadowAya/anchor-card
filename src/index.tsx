@@ -1,10 +1,11 @@
+/* eslint-disable linebreak-style */
 /* eslint-disable brace-style */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable react/jsx-no-constructed-context-values */
 /* eslint-disable no-underscore-dangle */
 // import { HomeAssistant } from 'custom-card-helpers';
 import { render } from 'preact';
-import { Config } from 'types';
+import type { Config } from 'types';
 
 function debounce(func: Function, delay = 100) {
   // eslint-disable-next-line no-undef
@@ -17,6 +18,13 @@ function debounce(func: Function, delay = 100) {
   };
 }
 
+function locationWithoutAnchor(location: Location) {
+  if (!location) return null;
+  const urlParams = new URLSearchParams(location.search);
+  urlParams.delete('anchor');
+  return `${window.location.protocol}//${window.location.host}${window.location.pathname}?${urlParams}`;
+}
+
 class AnchorCard extends HTMLElement {
   constructor() {
     super();
@@ -25,37 +33,39 @@ class AnchorCard extends HTMLElement {
 
   private config: Config;
 
-  private lastUrl: string | null = null;
+  private previousUrl: Location | null = null;
+
+  private goBackResponsibility: boolean = false;
 
   handlePopState: () => void;
+
+  private debouncedBack = debounce(() => {
+    console.log('going back');
+    window.history.back();
+  }, 100);
 
   scrollToAnchor() {
     requestAnimationFrame(() => {
       setTimeout(() => {
-        const anchorId = this.config.anchor_id;
+        // Get current position
+        const rect = this.getBoundingClientRect();
+        const offset = this.config.offset || 0;
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const anchorParam = urlParams.get('anchor');
+        // Smooth scroll to the calculated position
+        window.scrollTo({
+          top: rect.top + scrollTop + offset,
+          behavior: 'smooth',
+        });
 
-        if (anchorParam && anchorParam === anchorId) {
-          // Get current position
-          const rect = this.getBoundingClientRect();
-          const offset = this.config.offset || 0;
-          const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        if (this.config.remove_anchor !== false) {
+          // Remove anchor param from url
+          const newUrl = locationWithoutAnchor(window.location);
 
-          // Smooth scroll to the calculated position
-          window.scrollTo({
-            top: rect.top + scrollTop + offset,
-            behavior: 'smooth',
-          });
-
-          if (this.config.remove_anchor !== false) {
-            // Remove anchor param from url
-            urlParams.delete('anchor');
-            const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?${urlParams}`;
-
-            window.history.replaceState({}, '', newUrl);
-          }
+          this.previousUrl = window.location;
+          window.history.replaceState({}, '', newUrl);
+        } else {
+          this.previousUrl = window.location;
         }
       }, this.config.timeout || 150);
     });
@@ -64,17 +74,26 @@ class AnchorCard extends HTMLElement {
   connectedCallback() {
     (() => {
       const checkLocationChange = debounce(() => {
-        const newUrl = window.location.href;
-
         if (
           this.config.disable_in_edit_mode !== false
           && window.location.search.includes('edit=1')
-        ) return;
+        ) {
+          // this.previousUrl = window.location;
+          return;
+        }
 
-        if (this.config.strict_url_change && (newUrl === this.lastUrl)) return;
+        const anchorId = this.config.anchor_id;
+        const anchorParam = new URLSearchParams(window.location.search).get('anchor');
 
-        window.dispatchEvent(new Event('locationchange'));
-        this.lastUrl = newUrl;
+        if (anchorParam) {
+          if (anchorParam === anchorId) {
+            this.goBackResponsibility = true;
+            window.dispatchEvent(new Event('locationchange'));
+          } else {
+            this.goBackResponsibility = false;
+          }
+          // this.previousUrl = window.location;
+        }
       }, 100);
 
       const oldPushState = window.history.pushState;
@@ -95,6 +114,27 @@ class AnchorCard extends HTMLElement {
 
       this.handlePopState = () => {
         checkLocationChange();
+        requestAnimationFrame(() => {
+          const anchorId = this.config.anchor_id;
+          const anchorParam = new URLSearchParams(window.location.search).get('anchor');
+
+          console.log(`responsibility for ${this.config.anchor_id}: ${this.goBackResponsibility}`);
+          console.log(`previous location: ${locationWithoutAnchor(this.previousUrl)}`);
+          console.log(`current location: ${locationWithoutAnchor(window.location)}`);
+
+          if (
+            this.goBackResponsibility
+            && (!anchorParam || anchorParam !== anchorId)
+            && locationWithoutAnchor(window.location) === locationWithoutAnchor(this.previousUrl)
+          ) {
+            // this.debouncedBack();
+            this.previousUrl = window.location;
+            window.history.back();
+            // setTimeout(() => {
+            //   window.history.back();
+            // }, 2000);
+          }
+        });
       };
 
       window.addEventListener('popstate', this.handlePopState);
@@ -102,10 +142,16 @@ class AnchorCard extends HTMLElement {
 
     window.addEventListener('locationchange', this.scrollToAnchor);
 
-    window.dispatchEvent(new Event('locationchange'));
+    const anchorId = this.config.anchor_id;
+    const anchorParam = new URLSearchParams(window.location.search).get('anchor');
+
+    if (anchorParam && anchorParam === anchorId) window.dispatchEvent(new Event('locationchange'));
   }
 
   disconnectedCallback() {
+    this.goBackResponsibility = false;
+    this.previousUrl = null;
+
     window.removeEventListener('locationchange', this.scrollToAnchor);
 
     window.removeEventListener('popstate', this.handlePopState);
