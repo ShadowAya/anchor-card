@@ -63,21 +63,8 @@ Follow these steps to install and use the `anchor-card` in your Home Assistant s
 
 ### HACS
 
-#### Step 1: Add custom repository
-
-1. Open HACS > Frontend
-2. Go to the **Custom Repositories** tab (top right)
-3. Fill out a new repo
-
-   a. **Repository:** `https://github.com/ShadowAya/anchor-card`
-
-   b. **Category:** Lovelace
-   
-6. Add
-
-#### Step 2: Download the card
-
-Download the card via the newly added repository
+### Now officially available in HACS 🎉
+You can find and download the card in the frontend tab of HACS
 
 ### Manual
 
