@@ -51,14 +51,14 @@ class AnchorCard extends HTMLElement {
 
   scrollToAnchor() {
     requestAnimationFrame(() => {
-      setTimeout(() => {
-        const anchorId = this.config.anchor_id;
+      const anchorId = this.config.anchor_id;
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const anchorParam = urlParams.get('anchor');
+      const urlParams = new URLSearchParams(window.location.search);
+      const anchorParam = urlParams.get('anchor');
 
-        if (anchorParam && anchorParam === anchorId) {
-          if (this.config.backout === true) this.backoutResponsibility = true;
+      if (anchorParam && anchorParam === anchorId) {
+        if (this.config.backout === true) this.backoutResponsibility = true;
+        setTimeout(() => {
           // Get current position
           const rect = this.getBoundingClientRect();
           const offset = this.config.offset || 0;
@@ -69,20 +69,20 @@ class AnchorCard extends HTMLElement {
             top: rect.top + scrollTop + offset,
             behavior: 'smooth',
           });
+        }, this.config.timeout || 150);
 
-          if (this.config.remove_anchor !== false) {
-            // Remove anchor param from url
-            urlParams.delete('anchor');
-            const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}${
-              urlParams.size ? '?' : ''
-            }${urlParams}`;
+        if (this.config.remove_anchor !== false) {
+          // Remove anchor param from url
+          urlParams.delete('anchor');
+          const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}${
+            urlParams.size ? '?' : ''
+          }${urlParams}`;
 
-            window.history.replaceState({}, '', newUrl);
-          }
-        } else if (anchorParam) {
-          this.backoutResponsibility = false;
+          window.history.replaceState({}, '', newUrl);
         }
-      }, this.config.timeout || 150);
+      } else if (anchorParam) {
+        this.backoutResponsibility = false;
+      }
     });
   }
 
