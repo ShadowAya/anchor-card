@@ -1,9 +1,10 @@
 {
-  "name": "preact-boilerplate-card",
+  "name": "anchor-card",
   "version": "1.0.0",
   "private": true,
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^20.11.21",
     "@types/styled-components": "^5.1.23",
     "@typescript-eslint/eslint-plugin": "^5.12.1",
     "@typescript-eslint/parser": "^5.12.1",
@@ -24,7 +25,7 @@
     "webpack-dev-server": "^4.7.4"
   },
   "scripts": {
-    "build": "webpack",
+    "build": "webpack --mode production",
     "watch": "webpack --watch",
     "dev": "webpack serve --open --mode development",
     "lint": "eslint \"src/**\"",
