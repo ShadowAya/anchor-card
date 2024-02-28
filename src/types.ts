@@ -7,6 +7,5 @@ export type Config = {
   negative_margin?: number;
   timeout?: number;
   disable_in_edit_mode?: boolean;
-  remove_anchor?: boolean;
   backout?: boolean;
 }

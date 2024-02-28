@@ -71,15 +71,13 @@ class AnchorCard extends HTMLElement {
           });
         }, this.config.timeout || 150);
 
-        if (this.config.remove_anchor !== false) {
-          // Remove anchor param from url
-          urlParams.delete('anchor');
-          const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}${
-            urlParams.size ? '?' : ''
-          }${urlParams}`;
+        // Remove anchor param from url
+        urlParams.delete('anchor');
+        const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}${
+          urlParams.size ? '?' : ''
+        }${urlParams}`;
 
-          window.history.replaceState({}, '', newUrl);
-        }
+        window.history.replaceState({}, '', newUrl);
       } else if (anchorParam) {
         this.backoutResponsibility = false;
       }
