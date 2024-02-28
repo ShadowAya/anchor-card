@@ -51,7 +51,7 @@ Here's an example configuration for the `anchor-card`:
 type: "custom:anchor-card"
 anchor_id: lights
 negative_margin: 10px
-timeout: 200ms
+timeout: 200
 offset: -5
 ```
 
