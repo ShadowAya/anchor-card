@@ -36,16 +36,10 @@ To use the `anchor-card`, you need to configure it with the following parameters
 4. **offset**: Determines the scroll offset.
    - Default value: `0`. It can also be set to a negative value to adjust the position as well.
 
-5. **strict_url_change**: Set to true to only scroll when the url changes.
-   - Default value: `false`
-
-6. **disable_in_edit_mode**: Set to true to prevent scrolling when edit=1
+5. **disable_in_edit_mode**: Set to true to prevent scrolling when edit=1
    - Default value: `true`
 
-7. **remove_anchor**: Set to true to remove the anchor from the url after scrolling to it.
-   - Default value: `true`
-
-8. **backout**: This option will prevent having to go back multiple times if you navigate within the same page. When going back, the anchor will continue going back as long as it sees the URL hasn't changed
+6. **backout**: This option will prevent having to go back multiple times if you navigate within the same page. When going back, the anchor will continue going back as long as it sees the URL hasn't changed
    - Default value: `false` (this option is new, so please report any issues you encounter)
 
 ### Configuration Example:
