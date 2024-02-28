@@ -28,7 +28,26 @@ class AnchorCard extends HTMLElement {
 
   private lastUrl: string | null = null;
 
-  handlePopState: () => void;
+  private backoutResponsibility: boolean = false;
+
+  checkLocationChange = debounce(() => {
+    const newUrl = window.location.href;
+
+    if (
+      this.config.disable_in_edit_mode !== false
+      && window.location.search.includes('edit=1')
+    ) return;
+
+    if (newUrl === this.lastUrl) {
+      if (this.backoutResponsibility) {
+        window.history.back();
+      }
+      return;
+    }
+
+    window.dispatchEvent(new Event('locationchange'));
+    this.lastUrl = newUrl;
+  }, 100);
 
   scrollToAnchor() {
     requestAnimationFrame(() => {
@@ -39,6 +58,7 @@ class AnchorCard extends HTMLElement {
         const anchorParam = urlParams.get('anchor');
 
         if (anchorParam && anchorParam === anchorId) {
+          if (this.config.backout === true) this.backoutResponsibility = true;
           // Get current position
           const rect = this.getBoundingClientRect();
           const offset = this.config.offset || 0;
@@ -59,32 +79,21 @@ class AnchorCard extends HTMLElement {
 
             window.history.replaceState({}, '', newUrl);
           }
+        } else if (anchorParam) {
+          this.backoutResponsibility = false;
         }
       }, this.config.timeout || 150);
     });
   }
 
   connectedCallback() {
+    this.lastUrl = window.location.href;
+
     (() => {
-      const checkLocationChange = debounce(() => {
-        const newUrl = window.location.href;
-
-        if (
-          this.config.disable_in_edit_mode !== false
-          && window.location.search.includes('edit=1')
-        ) return;
-
-        if (this.config.strict_url_change && (newUrl === this.lastUrl)) return;
-
-        window.dispatchEvent(new Event('locationchange'));
-        this.lastUrl = newUrl;
-      }, 100);
-
       const oldPushState = window.history.pushState;
       window.history.pushState = function pushState(...args) {
         const ret = oldPushState.apply(this, args);
         window.dispatchEvent(new Event('pushstate'));
-        checkLocationChange();
         return ret;
       };
 
@@ -92,15 +101,12 @@ class AnchorCard extends HTMLElement {
       window.history.replaceState = function replaceState(...args) {
         const ret = oldReplaceState.apply(this, args);
         window.dispatchEvent(new Event('replacestate'));
-        checkLocationChange();
         return ret;
       };
 
-      this.handlePopState = () => {
-        checkLocationChange();
-      };
-
-      window.addEventListener('popstate', this.handlePopState);
+      window.addEventListener('popstate', this.checkLocationChange);
+      window.addEventListener('pushstate', this.checkLocationChange);
+      window.addEventListener('replacestate', this.checkLocationChange);
     })();
 
     window.addEventListener('locationchange', this.scrollToAnchor);
@@ -111,7 +117,9 @@ class AnchorCard extends HTMLElement {
   disconnectedCallback() {
     window.removeEventListener('locationchange', this.scrollToAnchor);
 
-    window.removeEventListener('popstate', this.handlePopState);
+    window.removeEventListener('popstate', this.checkLocationChange);
+    window.removeEventListener('pushstate', this.checkLocationChange);
+    window.removeEventListener('replacestate', this.checkLocationChange);
   }
 
   setConfig(config: any) {
@@ -149,9 +157,6 @@ class AnchorCard extends HTMLElement {
                 </li>
                 <li>
                   offset - the scroll offset. default is 0. can be a negative value.
-                </li>
-                <li>
-                  strict_url_change - set to true to only scroll when the url changes.
                 </li>
                 <li>
                   disable_in_edit_mode - prevent scrolling when edit=1.
