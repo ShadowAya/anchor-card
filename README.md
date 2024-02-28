@@ -58,6 +58,7 @@ anchor_id: lights
 negative_margin: 10
 timeout: 200
 offset: -5
+backout: true
 ```
 
 Replace the values in the example with your desired settings, and add the card to your Lovelace dashboard.
