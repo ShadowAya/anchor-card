@@ -53,7 +53,9 @@ class AnchorCard extends HTMLElement {
           if (this.config.remove_anchor !== false) {
             // Remove anchor param from url
             urlParams.delete('anchor');
-            const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?${urlParams}`;
+            const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}${
+              urlParams.size ? '?' : ''
+            }${urlParams}`;
 
             window.history.replaceState({}, '', newUrl);
           }
@@ -124,6 +126,7 @@ class AnchorCard extends HTMLElement {
           { /* @ts-ignore */ }
           <ha-card style={{
             margin: `-${this.config.negative_margin || 13}px 0`,
+            borderWidth: '0px',
           }}
           >
             {!this.config.anchor_id && (
@@ -171,7 +174,10 @@ class AnchorCard extends HTMLElement {
   }
 }
 
-customElements.define('anchor-card', AnchorCard);
+const name = process.env.NODE_ENV === 'development' ? 'anchor-card-dev' : 'anchor-card';
+const title = process.env.NODE_ENV === 'development' ? 'Anchor Card (Dev)' : 'Anchor Card';
+
+customElements.define(name, AnchorCard);
 
 declare global {
   // eslint-disable-next-line no-unused-vars
@@ -182,8 +188,8 @@ declare global {
 
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type: 'anchor-card',
-  name: 'Anchor Card',
+  type: name,
+  name: title,
   preview: false,
   description: 'A card that acts as a scroll anchor',
 });
