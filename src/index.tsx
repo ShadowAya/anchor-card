@@ -87,6 +87,7 @@ class AnchorCard extends HTMLElement {
   }
 
   connectedCallback() {
+    this.backoutResponsibility = false;
     this.lastUrl = window.location.href;
 
     (() => {
