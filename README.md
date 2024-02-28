@@ -10,11 +10,13 @@ An anchor (scroll to) card for Home Assistant!
 
 ### Known issues
 
-When navigating within the same page, a new entry for the same URL gets pushed into history. It's not possible to remove history entries, so the same page URL will appear in your history multiple times.
+~~When navigating within the same page, a new entry for the same URL gets pushed into history. It's not possible to remove history entries, so the same page URL will appear in your history multiple times.~~
 
-Example: when you navigate to "kitchen" and then to "kitchen - lights" and then "kitchen - covers", you'll have to go back three times to leave the "kitchen" page, instead of one
+~~Example: when you navigate to "kitchen" and then to "kitchen - lights" and then "kitchen - covers", you'll have to go back three times to leave the "kitchen" page, instead of one~~
 
-I am currently working on a workaround
+~~I am currently working on a workaround~~
+
+update: a `backout` option has been added that will go back multiple times for you. Check Usage for more info.
 
 ## Usage
 
@@ -42,6 +44,9 @@ To use the `anchor-card`, you need to configure it with the following parameters
 
 7. **remove_anchor**: Set to true to remove the anchor from the url after scrolling to it.
    - Default value: `true`
+
+8. **backout**: This option will prevent having to go back multiple times if you navigate within the same page. When going back, the anchor will continue going back as long as it sees the URL hasn't changed
+   - Default value: `false` (this option is new, so please report any issues you encounter)
 
 ### Configuration Example:
 
