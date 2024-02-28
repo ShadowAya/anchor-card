@@ -25,7 +25,7 @@ To use the `anchor-card`, you need to configure it with the following parameters
    - **Example**: To scroll to a card with an `anchor_id` of "lights", your URL would look like this: `lovelace/0?anchor=lights`
 
 2. **negative_margin**: Adjusts the card's top-down margin for visual spacing.
-   - Default value: `13px`.
+   - Default value: `13`.
 
 3. **timeout**: Specifies the waiting time before scrolling to the card.
    - Useful in cases where other cards might take longer to render.
@@ -50,7 +50,7 @@ Here's an example configuration for the `anchor-card`:
 ```yaml
 type: "custom:anchor-card"
 anchor_id: lights
-negative_margin: 10px
+negative_margin: 10
 timeout: 200
 offset: -5
 ```
