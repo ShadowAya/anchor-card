@@ -88,10 +88,17 @@ class AnchorCard extends HTMLElement {
           const offset = this.config.offset || 0;
           const scrollTop = window.scrollY || document.documentElement.scrollTop;
 
-          smoothScrollTo(
-            rect.top + scrollTop + offset,
-            this.config.transition || 1000,
-          );
+          if (this.config.transition) {
+            smoothScrollTo(
+              rect.top + scrollTop + offset,
+              this.config.transition,
+            );
+          } else {
+            window.scrollTo({
+              top: rect.top + scrollTop + offset,
+              behavior: 'smooth',
+            });
+          }
         }, this.config.timeout || 150);
 
         // Remove anchor param from url
