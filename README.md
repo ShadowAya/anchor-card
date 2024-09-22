@@ -29,23 +29,23 @@ To use the `anchor-card`, you need to configure it with the following parameters
 2. **negative_margin**: Adjusts the card's top-down margin for visual spacing.
    - Default value: `13`.
 
-3. **timeout**: Specifies the waiting time before scrolling to the card.
+2. **timeout**: Specifies the waiting time before scrolling to the card.
    - Useful in cases where other cards might take longer to render.
    - Default value: `150` (in ms).
 
-4. **offset**: Determines the scroll offset.
+2. **offset**: Determines the scroll offset.
    - Default value: `0`. It can also be set to a negative value to adjust the position as well.
 
-5. **disable_in_edit_mode**: Set to true to prevent scrolling when edit=1
+2. **transition**: Set a custom transition duration
+      - Defaults to browser provided 'smooth' transition
+
+2. **disable_in_edit_mode**: Set to true to prevent scrolling when edit=1
    - Default value: `true`
 
-6. **backout**: This option will prevent having to go back multiple times if you navigate within the same page. When going back, the anchor will continue going back as long as it sees the URL hasn't changed
+2. **backout**: This option will prevent having to go back multiple times if you navigate within the same page. When going back, the anchor will continue going back as long as it sees the URL hasn't changed
       - Default value: `false` \
         it's better to use this only on the anchors on pages that need it, and on **all the anchors on that page** \
         *this option is new, so please report any issues you encounter*
-
-7. **transition**: Set a custom transition duration
-      - Defaults to browser provided 'smooth' transition
 
 ### Configuration Example:
 
