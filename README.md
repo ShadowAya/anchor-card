@@ -44,6 +44,9 @@ To use the `anchor-card`, you need to configure it with the following parameters
         it's better to use this only on the anchors on pages that need it, and on **all the anchors on that page** \
         *this option is new, so please report any issues you encounter*
 
+7. **transition**: Set a custom transition duration
+      - Defaults to browser provided 'smooth' transition
+
 ### Configuration Example:
 
 Here's an example configuration for the `anchor-card`:
