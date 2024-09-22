@@ -8,4 +8,5 @@ export type Config = {
   timeout?: number;
   disable_in_edit_mode?: boolean;
   backout?: boolean;
+  transition?: number;
 }

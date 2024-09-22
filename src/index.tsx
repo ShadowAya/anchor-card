@@ -5,6 +5,7 @@
 /* eslint-disable no-underscore-dangle */
 // import { HomeAssistant } from 'custom-card-helpers';
 import { render } from 'preact';
+import { JSXInternal } from 'preact/src/jsx';
 import { Config } from 'types';
 
 function debounce(func: Function, delay = 100) {
@@ -16,6 +17,29 @@ function debounce(func: Function, delay = 100) {
       func.apply(this, args);
     }, delay);
   };
+}
+
+function smoothScrollTo(targetPosition: number, duration: number) {
+  const startPosition = window.scrollY;
+  const distance = targetPosition - startPosition;
+  let startTime: number | null = null;
+
+  function animation(currentTime: number) {
+    if (startTime === null) startTime = currentTime;
+    const timeElapsed = currentTime - startTime;
+    const run = ease(timeElapsed, startPosition, distance, duration);
+    window.scrollTo(0, run);
+    if (timeElapsed < duration) requestAnimationFrame(animation);
+  }
+
+  function ease(t: number, b: number, c: number, d: number) {
+    t /= d / 2;
+    if (t < 1) return c / 2 * t * t + b;
+    t--;
+    return -c / 2 * (t * (t - 2) - 1) + b;
+  }
+
+  requestAnimationFrame(animation);
 }
 
 class AnchorCard extends HTMLElement {
@@ -64,11 +88,10 @@ class AnchorCard extends HTMLElement {
           const offset = this.config.offset || 0;
           const scrollTop = window.scrollY || document.documentElement.scrollTop;
 
-          // Smooth scroll to the calculated position
-          window.scrollTo({
-            top: rect.top + scrollTop + offset,
-            behavior: 'smooth',
-          });
+          smoothScrollTo(
+            rect.top + scrollTop + offset,
+            this.config.transition || 1000,
+          );
         }, this.config.timeout || 150);
 
         // Remove anchor param from url
@@ -87,6 +110,15 @@ class AnchorCard extends HTMLElement {
   connectedCallback() {
     this.backoutResponsibility = false;
     this.lastUrl = window.location.href;
+
+    // fix scaling
+    setTimeout(() => {
+      const parent = this.parentElement;
+      if (parent) {
+        parent.style.height = '0px';
+        parent.style.maxHeight = '0px';
+      }
+    }, 10);
 
     (() => {
       const oldPushState = window.history.pushState;
@@ -134,7 +166,10 @@ class AnchorCard extends HTMLElement {
           <ha-card style={{
             margin: `-${this.config.negative_margin || 13}px 0`,
             borderWidth: '0px',
-          }}
+            maxHeight: '0px',
+            height: '0px',
+            transform: 'scale(0)',
+          } as JSXInternal.CSSProperties}
           >
             {!this.config.anchor_id && (
               <ul style={{ padding: '20px' }}>
