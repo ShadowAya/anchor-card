@@ -40,7 +40,9 @@ To use the `anchor-card`, you need to configure it with the following parameters
    - Default value: `true`
 
 6. **backout**: This option will prevent having to go back multiple times if you navigate within the same page. When going back, the anchor will continue going back as long as it sees the URL hasn't changed
-   - Default value: `false` (this option is new, so please report any issues you encounter)
+      - Default value: `false` \
+        it's better to use this only on the anchors on pages that need it, and on **all the anchors on that page** \
+        *this option is new, so please report any issues you encounter*
 
 ### Configuration Example:
 
