@@ -54,6 +54,8 @@ class AnchorCard extends HTMLElement {
 
   private backoutResponsibility: boolean = false;
 
+  private anchorReplacementElement: Element | null = null;
+
   checkLocationChange = debounce(() => {
     const newUrl = window.location.href;
 
@@ -84,7 +86,9 @@ class AnchorCard extends HTMLElement {
         if (this.config.backout === true) this.backoutResponsibility = true;
         setTimeout(() => {
           // Get current position
-          const rect = this.getBoundingClientRect();
+          const rect = this.anchorReplacementElement ?
+            this.anchorReplacementElement.getBoundingClientRect() :
+            this.getBoundingClientRect();
           const offset = this.config.offset || 0;
           const scrollTop = window.scrollY || document.documentElement.scrollTop;
 
@@ -124,6 +128,16 @@ class AnchorCard extends HTMLElement {
       if (parent) {
         parent.style.height = '0px';
         parent.style.maxHeight = '0px';
+      }
+    }, 10);
+
+    // fix scaling in section view
+    setTimeout(() => {
+      const parent = this.parentElement.parentElement;
+      if (parent && parent.classList.contains('card')) {
+        parent.style.visibility = 'hidden';
+        parent.style.position = 'absolute';
+        this.anchorReplacementElement = parent.nextElementSibling;
       }
     }, 10);
 
