@@ -10,7 +10,8 @@ An anchor (scroll to) card for Home Assistant!
 
 ## Disclaimer for Section view users
 
-- If you use section view, the anchor is not a part of the grid and scrolls to the **next card**. Keep this in mind and don't put the card last.
+- **There's a bug where you can't open entities after using the anchor**
+- The anchor is not a part of the grid and scrolls to the **next card**. Keep this in mind and don't put the card last.
 - If you want to edit the anchor card, you have to refresh the page **while inside edit mode**. The card won't be visible if you enter edit mode from view for the first time.
 
 ## Usage
