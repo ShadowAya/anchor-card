@@ -4,9 +4,12 @@
 /* eslint-disable react/jsx-no-constructed-context-values */
 /* eslint-disable no-underscore-dangle */
 // import { HomeAssistant } from 'custom-card-helpers';
-import { render } from 'preact';
+import { createRef, render } from 'preact';
 import { JSXInternal } from 'preact/src/jsx';
 import { Config } from 'types';
+import { HomeAssistant } from 'custom-card-helpers';
+import FormComponent from 'FormComponent';
+import { ConfigProvider, HassContext, HassProvider } from 'context';
 
 function debounce(func: Function, delay = 100) {
   // eslint-disable-next-line no-undef
@@ -42,37 +45,42 @@ function smoothScrollTo(targetPosition: number, duration: number) {
   requestAnimationFrame(animation);
 }
 
+const parentCardName = process.env.NODE_ENV === 'development' ? 'anchor-card-dev' : 'anchor-card';
+const parentCardTitle = process.env.NODE_ENV === 'development' ? 'Anchor Card (Dev)' : 'Anchor Card';
+
+const configCardName = process.env.NODE_ENV === 'development' ? 'anchor-card-editor-dev' : 'anchor-card-editor';
+
 class AnchorCard extends HTMLElement {
   constructor() {
     super();
     this.scrollToAnchor = this.scrollToAnchor.bind(this);
   }
 
+  static getConfigElement() {
+    return document.createElement(configCardName);
+  }
+
+  static getStubConfig() {
+    return {
+      anchor_id: 'example',
+      negative_margin: 13,
+      timeout: 50,
+      offset: 0,
+      transition: 0,
+    }
+  }
+
   private config: Config;
 
-  private lastUrl: string | null = null;
-
-  private backoutResponsibility: boolean = false;
-
   private anchorReplacementElement: Element | null = null;
+  private replacementIsOnTop = false;
 
   checkLocationChange = debounce(() => {
-    const newUrl = window.location.href;
-
     if (
-      this.config.disable_in_edit_mode !== false
-      && window.location.search.includes('edit=1')
+      window.location.search.includes('edit=1')
     ) return;
 
-    if (newUrl === this.lastUrl) {
-      if (this.backoutResponsibility) {
-        window.history.back();
-      }
-      return;
-    }
-
     window.dispatchEvent(new Event('locationchange'));
-    this.lastUrl = newUrl;
   }, 100);
 
   scrollToAnchor() {
@@ -82,8 +90,7 @@ class AnchorCard extends HTMLElement {
       const urlParams = new URLSearchParams(window.location.search);
       const anchorParam = urlParams.get('anchor');
 
-      if (anchorParam && anchorParam === anchorId) {
-        if (this.config.backout === true) this.backoutResponsibility = true;
+      if (anchorParam === anchorId) {
         setTimeout(() => {
           // Get current position
           const rect = this.anchorReplacementElement ?
@@ -94,16 +101,16 @@ class AnchorCard extends HTMLElement {
 
           if (this.config.transition) {
             smoothScrollTo(
-              rect.top + scrollTop + offset,
+              rect.top + scrollTop + offset + (this.replacementIsOnTop ? rect.height : 0),
               this.config.transition,
             );
           } else {
             window.scrollTo({
-              top: rect.top + scrollTop + offset,
+              top: rect.top + scrollTop + offset + (this.replacementIsOnTop ? rect.height : 0),
               behavior: 'smooth',
             });
           }
-        }, this.config.timeout || 150);
+        }, this.config.timeout || 50);
 
         // Remove anchor param from url
         urlParams.delete('anchor');
@@ -112,15 +119,11 @@ class AnchorCard extends HTMLElement {
         }${urlParams}`;
 
         window.history.replaceState({}, '', newUrl);
-      } else if (anchorParam) {
-        this.backoutResponsibility = false;
       }
     });
   }
 
   connectedCallback() {
-    this.backoutResponsibility = false;
-    this.lastUrl = window.location.href;
 
     // fix scaling
     setTimeout(() => {
@@ -137,7 +140,12 @@ class AnchorCard extends HTMLElement {
       if (parent && parent.classList.contains('card')) {
         parent.style.visibility = 'hidden';
         parent.style.position = 'absolute';
-        this.anchorReplacementElement = parent.nextElementSibling;
+        if (parent.nextElementSibling)
+          this.anchorReplacementElement = parent.nextElementSibling;
+        else if (parent.previousElementSibling) {
+          this.anchorReplacementElement = parent.previousElementSibling;
+          this.replacementIsOnTop = true;
+        }
       }
     }, 10);
 
@@ -183,7 +191,6 @@ class AnchorCard extends HTMLElement {
     render(
       (
         <>
-          { /* @ts-ignore */ }
           <ha-card style={{
             margin: `-${this.config.negative_margin || 13}px 0`,
             borderWidth: '0px',
@@ -191,39 +198,7 @@ class AnchorCard extends HTMLElement {
             height: '0px',
             transform: 'scale(0)',
           } as JSXInternal.CSSProperties}
-          >
-            {!this.config.anchor_id && (
-              <ul style={{ padding: '20px' }}>
-                <li>
-                  anchor_id - set a per-page unique identifier.
-                  scroll to this card using the url param
-                  {' '}
-                  <strong>anchor</strong>
-                  <br />
-                  <i>example: lovelace/0?anchor=lights</i>
-                </li>
-                <li>
-                  negative_margin - set a negative margin of the card to fix spacing visuals.
-                  default is 13px.
-                </li>
-                <li>
-                  timeout - set a timeout to wait before scrolling to the card. default is 150ms.
-                  increase this if other cards take long to render.
-                </li>
-                <li>
-                  offset - the scroll offset. default is 0. can be a negative value.
-                </li>
-                <li>
-                  disable_in_edit_mode - prevent scrolling when edit=1.
-                </li>
-                <li>
-                  remove_anchor - removes the anchor param from the url after scrolling.
-                  default is true.
-                </li>
-              </ul>
-            )}
-            { /* @ts-ignore */ }
-          </ha-card>
+          />
         </>
       ), this,
     );
@@ -234,10 +209,163 @@ class AnchorCard extends HTMLElement {
   }
 }
 
-const name = process.env.NODE_ENV === 'development' ? 'anchor-card-dev' : 'anchor-card';
-const title = process.env.NODE_ENV === 'development' ? 'Anchor Card (Dev)' : 'Anchor Card';
+class AnchorCardEditor extends HTMLElement {
 
-customElements.define(name, AnchorCard);
+  private _config: Config;
+
+  private _hass?: HomeAssistant;
+
+  private usedBackoutBefore = false;
+
+  set hass(hass: HomeAssistant | undefined) {
+    this._hass = hass;
+  }
+
+  setConfig(config: Config) {
+    if (
+      config.anchor_id === undefined ||
+      config.negative_margin === undefined ||
+      config.timeout === undefined ||
+      config.offset === undefined ||
+      config.transition === undefined ||
+      // @ts-ignore
+      config.backout !== undefined
+    ) {
+      // @ts-ignore
+      if (config.backout !== undefined) this.usedBackoutBefore = true;
+      config = {
+        anchor_id: 'example',
+        negative_margin: 13,
+        timeout: 50,
+        offset: 0,
+        transition: 0,
+        ...config,
+        // @ts-ignore
+        backout: undefined,
+      }
+      const event = new CustomEvent("config-changed", {
+        detail: { config },
+        bubbles: true,
+        composed: true,
+      });
+      this.dispatchEvent(event);
+    }
+    this._config = config;
+    this._render();
+  }
+
+  private configChanged(ev: any) {
+
+    // if (!this._config || !this._hass) {
+    //   return;
+    // }
+    const config = Object.assign({}, this._config);
+    config.anchor_id = ev.detail.value.anchor_id;
+    config.negative_margin = ev.detail.value.negative_margin;
+    config.timeout = ev.detail.value.timeout;
+    config.offset = ev.detail.value.offset;
+    config.transition = ev.detail.value.transition;
+
+    this._config = config;
+
+    const event = new CustomEvent("config-changed", {
+      detail: { config },
+      bubbles: true,
+      composed: true,
+    });
+    this.dispatchEvent(event);
+
+    this._render();
+  }
+
+  computeLabel(schema: { name: string }) {
+    var labelMap = {
+        anchor_id: "Anchor ID",
+        negative_margin: "Negative Margin",
+        timeout: "Timeout (wait time before scrolling)",
+        offset: "Offset (scroll offset)",
+        transition: "Transition (scroll duration, set to 0 for default smooth scroll, otherwise do not set values <10)",
+    }
+    return labelMap[schema.name as keyof typeof labelMap] || schema.name;
+  }
+
+  private _render = () => {
+    render((<>
+      <HassProvider hass={this._hass}>
+      <ConfigProvider config={this._config}>
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        marginBottom: '12px',
+      }}>
+        <span>Set a per-page unique anchor ID to this card.</span>
+        <span>To scroll to this anchor, navigate to it with a URL param via another card/action, example:</span>
+        <code style={{
+          backgroundColor: '#00000050',
+          padding: '4px 8px',
+          borderRadius: '4px',
+        }}>
+          /lovelace/lights?anchor=kitchen
+        </code>
+        <div style={{
+          backgroundColor: '#00000050',
+          padding: '4px 8px',
+          borderRadius: '4px',
+          whiteSpace: 'pre-wrap',
+          fontFamily: 'monospace',
+        }}><span>
+          tap_action:{"\n"}
+          {"  "}action: navigate{"\n"}
+          {"  "}navigation_path: /lovelace/lights?anchor=kitchen{"\n"}
+          {"  "}navigation_replace: true
+        </span></div>
+      </div>
+      <FormComponent
+        // hass={this._hass}
+        // config={this._config}
+        schema={[
+          {name: 'anchor_id', selector: { text: {} }},
+          {name: 'negative_margin', selector: { number: { min: -100, max: 100, step: 5 } }},
+          {name: 'timeout', selector: { number: { min: 0, max: 1000, step: 10 } }},
+          {name: 'offset', selector: { number: { min: -500, max: 500, step: 10 } }},
+          {name: 'transition', selector: { number: { min: 0, max: 2000, step: 50 } }},
+        ]}
+        computeLabel={this.computeLabel}
+        configChanged={this.configChanged.bind(this)}
+      />
+      <p>
+        *
+        {
+          this.usedBackoutBefore ?
+          <><b style={{
+            color: 'red',
+          }}>You used <code>backout</code> on this card, check this section:</b><br/></> :
+          ''
+        }
+        If you navigate within the same page, use the
+        {' '}
+        <a href="https://www.home-assistant.io/dashboards/actions/#navigation_replace">navigation_replace</a>
+        {' '}
+        option on your navigation action to prevent having to go back multiple times to reach the previous page.
+      </p>
+      <p>
+        *If you use the Sections view and want to edit this card, refresh the page
+        {' '}
+        <b style={{
+          color: 'red',
+        }}>when already in edit mode</b>
+        {' '}
+        (that's the only way to make it appear).
+      </p>
+      </ConfigProvider>
+      </HassProvider>
+    </>), this);
+  }
+}
+
+customElements.define(parentCardName, AnchorCard);
+customElements.define(configCardName, AnchorCardEditor);
 
 declare global {
   // eslint-disable-next-line no-unused-vars
@@ -248,8 +376,8 @@ declare global {
 
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type: name,
-  name: title,
+  type: parentCardName,
+  name: parentCardTitle,
   preview: false,
   description: 'A card that acts as a scroll anchor',
 });

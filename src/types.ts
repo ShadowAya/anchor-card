@@ -6,7 +6,5 @@ export type Config = {
   offset?: number;
   negative_margin?: number;
   timeout?: number;
-  disable_in_edit_mode?: boolean;
-  backout?: boolean;
   transition?: number;
 }

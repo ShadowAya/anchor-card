@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "typeRoots": ["./globalTypes"],
     "outDir": "./dist/",
     "noImplicitAny": true,
     "module": "es6",
@@ -12,6 +13,6 @@
     "baseUrl": ".",
     "paths": {
       "*": ["./src/*"],
-    }
+    },
   }
 }
