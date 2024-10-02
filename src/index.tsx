@@ -137,7 +137,7 @@ class AnchorCard extends HTMLElement {
     // fix scaling in section view
     setTimeout(() => {
       const parent = this.parentElement.parentElement;
-      if (parent && parent.classList.contains('card')) {
+      if (parent && parent.classList.contains('card') && parent.parentElement.classList.contains('container')) {
         parent.style.visibility = 'hidden';
         parent.style.position = 'absolute';
         if (parent.nextElementSibling)
