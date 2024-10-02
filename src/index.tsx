@@ -229,7 +229,9 @@ class AnchorCardEditor extends HTMLElement {
       config.offset === undefined ||
       config.transition === undefined ||
       // @ts-ignore
-      config.backout !== undefined
+      config.backout !== undefined ||
+      // @ts-ignore
+      config.disable_in_edit_mode !== undefined
     ) {
       // @ts-ignore
       if (config.backout !== undefined) this.usedBackoutBefore = true;
@@ -242,6 +244,8 @@ class AnchorCardEditor extends HTMLElement {
         ...config,
         // @ts-ignore
         backout: undefined,
+        // @ts-ignore
+        disable_in_edit_mode: undefined,
       }
       const event = new CustomEvent("config-changed", {
         detail: { config },
