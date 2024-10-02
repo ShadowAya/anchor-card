@@ -8,15 +8,11 @@ An anchor (scroll to) card for Home Assistant!
 
 *made with the help of the [zupre](https://github.com/dangreco/zupre) template*
 
-### Known issues
+## Disclaimer for Section view users
 
-~~When navigating within the same page, a new entry for the same URL gets pushed into history. It's not possible to remove history entries, so the same page URL will appear in your history multiple times.~~
-
-~~Example: when you navigate to "kitchen" and then to "kitchen - lights" and then "kitchen - covers", you'll have to go back three times to leave the "kitchen" page, instead of one~~
-
-~~I am currently working on a workaround~~
-
-update: a `backout` option has been added that will go back multiple times for you. Check Usage for more info.
+- **There's a bug where you can't open entities after using the anchor**
+- The anchor is not a part of the grid and scrolls to the **next card**. Keep this in mind and don't put the card last.
+- If you want to edit the anchor card, you have to refresh the page **while inside edit mode**. The card won't be visible if you enter edit mode from view for the first time.
 
 ## Usage
 
@@ -45,7 +41,7 @@ To use the `anchor-card`, you need to configure it with the following parameters
 2. **backout**: This option will prevent having to go back multiple times if you navigate within the same page. When going back, the anchor will continue going back as long as it sees the URL hasn't changed
       - Default value: `false` \
         it's better to use this only on the anchors on pages that need it, and on **all the anchors on that page** \
-        *this option is new, so please report any issues you encounter*
+        *please report any issues you encounter with this option*
 
 ### Configuration Example:
 
