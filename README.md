@@ -8,10 +8,6 @@ An anchor (scroll to) card for Home Assistant!
 
 *made with the help of the [zupre](https://github.com/dangreco/zupre) template*
 
-## Disclaimer for Section view users
-
-If you want to edit the anchor card, you have to refresh the page **while inside edit mode**. The card won't be visible if you enter edit mode from view for the first time.
-
 ## Usage
 
 *The card has a GUI editor, so you can follow the instructions easily inside your Home Assistant*
@@ -35,28 +31,10 @@ To use the `anchor-card`, you need to configure it with the following parameters
 2. **transition**: Set a custom transition duration
       - Defaults to browser provided 'smooth' transition
 
-2. **disable_in_edit_mode**: Set to true to prevent scrolling when edit=1
-   - Default value: `true`
+## Disclaimers & Tips
 
-2. **backout**: This option will prevent having to go back multiple times if you navigate within the same page. When going back, the anchor will continue going back as long as it sees the URL hasn't changed
-      - Default value: `false` \
-        it's better to use this only on the anchors on pages that need it, and on **all the anchors on that page** \
-        *please report any issues you encounter with this option*
-
-### Configuration Example:
-
-Here's an example configuration for the `anchor-card`:
-
-```yaml
-type: "custom:anchor-card"
-anchor_id: lights
-negative_margin: 10
-timeout: 200
-offset: -5
-backout: true
-```
-
-Replace the values in the example with your desired settings, and add the card to your Lovelace dashboard.
+- For section view users, if you want to edit the anchor card, you have to refresh the page **while inside edit mode**. The card won't be visible if you enter edit mode from view for the first time.
+- If you are navigating within the same page and want to prevent having to go back multiple times, use [navigation_replace](https://www.home-assistant.io/dashboards/actions/#navigation_replace) on your navigation source
 
 ## Installation
 
