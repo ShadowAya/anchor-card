@@ -10,11 +10,11 @@ An anchor (scroll to) card for Home Assistant!
 
 ## Disclaimer for Section view users
 
-- **There's a bug where you can't open entities after using the anchor**
-- The anchor is not a part of the grid and scrolls to the **next card**. Keep this in mind and don't put the card last.
-- If you want to edit the anchor card, you have to refresh the page **while inside edit mode**. The card won't be visible if you enter edit mode from view for the first time.
+If you want to edit the anchor card, you have to refresh the page **while inside edit mode**. The card won't be visible if you enter edit mode from view for the first time.
 
 ## Usage
+
+*The card has a GUI editor, so you can follow the instructions easily inside your Home Assistant*
 
 To use the `anchor-card`, you need to configure it with the following parameters:
 
@@ -64,7 +64,7 @@ Follow these steps to install and use the `anchor-card` in your Home Assistant s
 
 ### HACS
 
-### Now officially available in HACS 🎉
+#### Now officially available in HACS 🎉
 You can find and download the card in the frontend tab of HACS
 
 ### Manual
