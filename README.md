@@ -1,12 +1,9 @@
 # anchor-card
 An anchor (scroll to) card for Home Assistant!
+> There is currently no way to scroll to specific points in your dashboard. This card fixes this and acts as an anchor you can scroll to.
 <p align="center">
   <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExaTM1bGhlMWt0aHlhdG4wd3cycGdxY3UzYTlhaG5rbThjMnl2dHRpdCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/kMzSlpnnCpINj6YBMw/giphy.gif" alt="Preview" height="600px">
 </p>
-
-> There is currently no way to scroll to specific points in your dashboard. This card fixes this and acts as an anchor you can scroll to.
-
-*made with the help of the [zupre](https://github.com/dangreco/zupre) template*
 
 ## Usage
 
