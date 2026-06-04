@@ -10,6 +10,7 @@ import { Config } from 'types';
 import { HomeAssistant } from 'custom-card-helpers';
 import FormComponent from 'FormComponent';
 import { ConfigProvider, HassContext, HassProvider } from 'context';
+import AnchorIcon from 'AnchorIcon';
 
 const DEFAULT_CONFIG = {
   negative_margin: 13,
@@ -79,12 +80,31 @@ class AnchorCard extends HTMLElement {
 
   private scrollToken = 0;
 
+  private lastEditMode?: boolean;
+
+  private get isEditMode() {
+    return new URLSearchParams(window.location.search).get('edit') === '1';
+  }
+
+  private pollEditMode() {
+    if (!this.isConnected) return;
+    const editMode = this.isEditMode;
+    if (editMode !== this.lastEditMode) {
+      this.lastEditMode = editMode;
+      this._render();
+      this.applyLayout();
+    }
+    requestAnimationFrame(() => this.pollEditMode());
+  }
+
   private handleLocationChanged() {
     this.scheduleScroll();
   }
 
   connectedCallback() {
-    this.applyHiddenLayout();
+    this.lastEditMode = undefined;
+    this.applyLayout();
+    requestAnimationFrame(() => this.pollEditMode());
     window.addEventListener('location-changed', this.handleLocationChanged);
     window.addEventListener('popstate', this.handleLocationChanged);
     window.addEventListener('hashchange', this.handleLocationChanged);
@@ -101,7 +121,7 @@ class AnchorCard extends HTMLElement {
   setConfig(config: Config) {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this._render();
-    this.applyHiddenLayout();
+    this.applyLayout();
     this.scheduleScroll();
   }
 
@@ -227,6 +247,46 @@ class AnchorCard extends HTMLElement {
     );
   }
 
+  private applyLayout() {
+    if (!this.config) return;
+    if (this.isEditMode) {
+      this.applyEditLayout();
+    } else {
+      this.applyHiddenLayout();
+    }
+  }
+
+  private applyEditLayout() {
+    this.style.display = 'block';
+    this.style.height = '';
+    this.style.maxHeight = '';
+    this.style.minHeight = '';
+    this.style.overflow = '';
+    this.style.margin = '0';
+    this.style.padding = '0';
+    this.style.border = '0';
+
+    const hostCard = this.findHostCard();
+
+    if (hostCard) {
+      hostCard.style.height = '';
+      hostCard.style.maxHeight = '';
+      hostCard.style.minHeight = '';
+      hostCard.style.overflow = '';
+      hostCard.style.margin = '';
+      hostCard.style.padding = '';
+    }
+
+    const gridWrapper = hostCard?.parentElement;
+
+    if (gridWrapper?.classList.contains('card')) {
+      gridWrapper.style.height = '';
+      gridWrapper.style.maxHeight = '';
+      gridWrapper.style.minHeight = '';
+      gridWrapper.style.overflow = '';
+    }
+  }
+
   private applyHiddenLayout() {
     if (!this.config) return;
 
@@ -264,22 +324,41 @@ class AnchorCard extends HTMLElement {
   private _render = () => {
     if (!this.config) return;
 
-    render(
-      (
-        <>
+    if (this.isEditMode) {
+      render(
+        (
           <ha-card style={{
-            margin: `-${this.config.negative_margin || DEFAULT_CONFIG.negative_margin}px 0`,
-            borderWidth: '0px',
-            maxHeight: '0px',
-            height: '0px',
-            minHeight: '0px',
-            overflow: 'visible',
-            transform: 'scale(0)',
-          } as JSXInternal.CSSProperties}
-          />
-        </>
-      ), this,
-    );
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '8px 12px',
+            overflow: 'hidden',
+            opacity: '0.6',
+            fontSize: '14px',
+          } as JSXInternal.CSSProperties}>
+            <AnchorIcon />
+            <span>{this.config.anchor_id}</span>
+          </ha-card>
+        ), this,
+      );
+    } else {
+      render(
+        (
+          <>
+            <ha-card style={{
+              margin: `-${this.config.negative_margin || DEFAULT_CONFIG.negative_margin}px 0`,
+              borderWidth: '0px',
+              maxHeight: '0px',
+              height: '0px',
+              minHeight: '0px',
+              overflow: 'visible',
+              transform: 'scale(0)',
+            } as JSXInternal.CSSProperties}
+            />
+          </>
+        ), this,
+      );
+    }
   };
 
   getCardSize() {
@@ -385,6 +464,7 @@ class AnchorCardEditor extends HTMLElement {
         gap: '8px',
         marginBottom: '12px',
       }}>
+        <span style={{opacity: 0.5, fontStyle: 'italic'}}>Card only visible in edit mode.</span>
         <span>Set a per-page unique anchor ID to this card.</span>
         <span>To scroll to this anchor, navigate to it with a URL param via another card/action, example:</span>
         <code style={{
@@ -434,15 +514,6 @@ class AnchorCardEditor extends HTMLElement {
         <a href="https://www.home-assistant.io/dashboards/actions/#navigation_replace">navigation_replace</a>
         {' '}
         option on your navigation action to prevent having to go back multiple times to reach the previous page.
-      </p>
-      <p>
-        *If you use the Sections view and want to edit this card, refresh the page
-        {' '}
-        <b style={{
-          color: 'red',
-        }}>when already in edit mode</b>
-        {' '}
-        (that's the only way to make it appear).
       </p>
       </ConfigProvider>
       </HassProvider>
