@@ -11,15 +11,23 @@ import { HomeAssistant } from 'custom-card-helpers';
 import FormComponent from 'FormComponent';
 import { ConfigProvider, HassContext, HassProvider } from 'context';
 
-function debounce(func: Function, delay = 100) {
-  // eslint-disable-next-line no-undef
-  let timeoutId: NodeJS.Timeout;
-  return (...args: any) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
-      func.apply(this, args);
-    }, delay);
-  };
+const DEFAULT_CONFIG = {
+  negative_margin: 13,
+  timeout: 250,
+  offset: 0,
+  transition: 0,
+};
+
+function delay(timeout: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, timeout);
+  });
+}
+
+function afterPaint(): Promise<void> {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+  });
 }
 
 function smoothScrollTo(targetPosition: number, duration: number) {
@@ -53,7 +61,7 @@ const configCardName = process.env.NODE_ENV === 'development' ? 'anchor-card-edi
 class AnchorCard extends HTMLElement {
   constructor() {
     super();
-    this.scrollToAnchor = this.scrollToAnchor.bind(this);
+    this.handleLocationChanged = this.handleLocationChanged.bind(this);
   }
 
   static getConfigElement() {
@@ -63,139 +71,209 @@ class AnchorCard extends HTMLElement {
   static getStubConfig() {
     return {
       anchor_id: 'example',
-      negative_margin: 13,
-      timeout: 50,
-      offset: 0,
-      transition: 0,
+      ...DEFAULT_CONFIG,
     }
   }
 
-  private config: Config;
+  private config?: Config;
 
-  private anchorReplacementElement: Element | null = null;
-  private replacementIsOnTop = false;
+  private scrollToken = 0;
 
-  checkLocationChange = debounce(() => {
-    if (
-      window.location.search.includes('edit=1')
-    ) return;
-
-    window.dispatchEvent(new Event('locationchange'));
-  }, 100);
-
-  scrollToAnchor() {
-    requestAnimationFrame(() => {
-      const anchorId = this.config.anchor_id;
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const anchorParam = urlParams.get('anchor');
-
-      if (anchorParam === anchorId) {
-        setTimeout(() => {
-          // Get current position
-          const rect = this.anchorReplacementElement ?
-            this.anchorReplacementElement.getBoundingClientRect() :
-            this.getBoundingClientRect();
-          const offset = this.config.offset || 0;
-          const scrollTop = window.scrollY || document.documentElement.scrollTop;
-
-          if (this.config.transition) {
-            smoothScrollTo(
-              rect.top + scrollTop + offset + (this.replacementIsOnTop ? rect.height : 0),
-              this.config.transition,
-            );
-          } else {
-            window.scrollTo({
-              top: rect.top + scrollTop + offset + (this.replacementIsOnTop ? rect.height : 0),
-              behavior: 'smooth',
-            });
-          }
-        }, this.config.timeout || 50);
-
-        // Remove anchor param from url
-        urlParams.delete('anchor');
-        const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}${
-          urlParams.size ? '?' : ''
-        }${urlParams}`;
-
-        window.history.replaceState({}, '', newUrl);
-      }
-    });
+  private handleLocationChanged() {
+    this.scheduleScroll();
   }
 
   connectedCallback() {
-
-    // fix scaling
-    setTimeout(() => {
-      const parent = this.parentElement;
-      if (parent) {
-        parent.style.height = '0px';
-        parent.style.maxHeight = '0px';
-      }
-    }, 10);
-
-    // fix scaling in section view
-    setTimeout(() => {
-      const parent = this.parentElement.parentElement;
-      if (parent && parent.classList.contains('card') && parent.parentElement.classList.contains('container')) {
-        parent.style.visibility = 'hidden';
-        parent.style.position = 'absolute';
-        if (parent.nextElementSibling)
-          this.anchorReplacementElement = parent.nextElementSibling;
-        else if (parent.previousElementSibling) {
-          this.anchorReplacementElement = parent.previousElementSibling;
-          this.replacementIsOnTop = true;
-        }
-      }
-    }, 10);
-
-    (() => {
-      const oldPushState = window.history.pushState;
-      window.history.pushState = function pushState(...args) {
-        const ret = oldPushState.apply(this, args);
-        window.dispatchEvent(new Event('pushstate'));
-        return ret;
-      };
-
-      const oldReplaceState = window.history.replaceState;
-      window.history.replaceState = function replaceState(...args) {
-        const ret = oldReplaceState.apply(this, args);
-        window.dispatchEvent(new Event('replacestate'));
-        return ret;
-      };
-
-      window.addEventListener('popstate', this.checkLocationChange);
-      window.addEventListener('pushstate', this.checkLocationChange);
-      window.addEventListener('replacestate', this.checkLocationChange);
-    })();
-
-    window.addEventListener('locationchange', this.scrollToAnchor);
-
-    window.dispatchEvent(new Event('locationchange'));
+    this.applyHiddenLayout();
+    window.addEventListener('location-changed', this.handleLocationChanged);
+    window.addEventListener('popstate', this.handleLocationChanged);
+    window.addEventListener('hashchange', this.handleLocationChanged);
+    this.scheduleScroll();
   }
 
   disconnectedCallback() {
-    window.removeEventListener('locationchange', this.scrollToAnchor);
-
-    window.removeEventListener('popstate', this.checkLocationChange);
-    window.removeEventListener('pushstate', this.checkLocationChange);
-    window.removeEventListener('replacestate', this.checkLocationChange);
+    this.scrollToken += 1;
+    window.removeEventListener('location-changed', this.handleLocationChanged);
+    window.removeEventListener('popstate', this.handleLocationChanged);
+    window.removeEventListener('hashchange', this.handleLocationChanged);
   }
 
-  setConfig(config: any) {
-    this.config = config;
+  setConfig(config: Config) {
+    this.config = { ...DEFAULT_CONFIG, ...config };
     this._render();
+    this.applyHiddenLayout();
+    this.scheduleScroll();
+  }
+
+  private scheduleScroll() {
+    if (!this.config || !this.isConnected) return;
+    if (new URLSearchParams(window.location.search).get('edit') === '1') return;
+    if (this.currentAnchor !== this.config.anchor_id) return;
+
+    const token = ++this.scrollToken;
+    this.scrollWhenReady(token);
+  }
+
+  private async scrollWhenReady(token: number) {
+    if (!this.config) return;
+
+    const waitTime = Number(this.config.timeout ?? DEFAULT_CONFIG.timeout);
+    const deadline = performance.now() + Math.max(waitTime, 2000);
+
+    await delay(waitTime);
+    await afterPaint();
+
+    while (token === this.scrollToken && performance.now() < deadline) {
+      const target = this.findScrollTarget();
+
+      if (target && this.hasUsableRect(target)) {
+        await afterPaint();
+        this.scrollToTarget(target);
+        this.clearAnchorParam();
+        return;
+      }
+
+      await delay(100);
+    }
+
+    if (token === this.scrollToken) {
+      this.scrollToTarget(this.findScrollTarget() || this);
+      this.clearAnchorParam();
+    }
+  }
+
+  private get currentAnchor() {
+    return new URLSearchParams(window.location.search).get('anchor');
+  }
+
+  private findHostCard(): HTMLElement | undefined {
+    let element = this.parentElement;
+
+    while (element) {
+      if (element.localName === 'hui-card') return element;
+      element = element.parentElement;
+    }
+
+    return undefined;
+  }
+
+  private findScrollTarget(): HTMLElement | undefined {
+    const hostCard = this.findHostCard();
+    const stackSibling = this.nextVisibleSibling(hostCard?.nextElementSibling);
+
+    if (stackSibling) return stackSibling;
+
+    const gridWrapper = hostCard?.parentElement?.classList.contains('card') ?
+      hostCard.parentElement :
+      undefined;
+    const gridSibling = this.nextVisibleSibling(gridWrapper?.nextElementSibling);
+
+    if (gridSibling) return gridSibling;
+
+    return hostCard || this;
+  }
+
+  private nextVisibleSibling(element: Element | null | undefined): HTMLElement | undefined {
+    let candidate = element;
+
+    while (candidate) {
+      if (
+        candidate instanceof HTMLElement &&
+        !candidate.hidden &&
+        getComputedStyle(candidate).display !== 'none'
+      ) {
+        return candidate;
+      }
+      candidate = candidate.nextElementSibling;
+    }
+
+    return undefined;
+  }
+
+  private hasUsableRect(element: Element): boolean {
+    if (!element.isConnected) return false;
+
+    const rect = element.getBoundingClientRect();
+    return rect.width > 0 || rect.height > 0;
+  }
+
+  private scrollToTarget(element: Element) {
+    if (!this.config) return;
+
+    const rect = element.getBoundingClientRect();
+    const offset = Number(this.config.offset || 0);
+    const targetPosition = rect.top + window.scrollY + offset;
+
+    if (Number(this.config.transition) > 0) {
+      smoothScrollTo(targetPosition, Number(this.config.transition));
+    } else {
+      window.scrollTo({
+        top: targetPosition,
+        behavior: 'smooth',
+      });
+    }
+  }
+
+  private clearAnchorParam() {
+    const url = new URL(window.location.href);
+
+    if (!url.searchParams.has('anchor')) return;
+
+    url.searchParams.delete('anchor');
+    window.history.replaceState(
+      window.history.state,
+      '',
+      `${url.pathname}${url.search}${url.hash}`,
+    );
+  }
+
+  private applyHiddenLayout() {
+    if (!this.config) return;
+
+    const negativeMargin = Number(this.config.negative_margin ?? DEFAULT_CONFIG.negative_margin);
+    this.style.display = 'block';
+    this.style.height = '0px';
+    this.style.maxHeight = '0px';
+    this.style.minHeight = '0px';
+    this.style.overflow = 'visible';
+    this.style.margin = `-${negativeMargin}px 0 0 0`;
+    this.style.padding = '0';
+    this.style.border = '0';
+
+    const hostCard = this.findHostCard();
+
+    if (hostCard) {
+      hostCard.style.height = '0px';
+      hostCard.style.maxHeight = '0px';
+      hostCard.style.minHeight = '0px';
+      hostCard.style.overflow = 'visible';
+      hostCard.style.margin = '0';
+      hostCard.style.padding = '0';
+    }
+
+    const gridWrapper = hostCard?.parentElement;
+
+    if (gridWrapper?.classList.contains('card')) {
+      gridWrapper.style.height = '0px';
+      gridWrapper.style.maxHeight = '0px';
+      gridWrapper.style.minHeight = '0px';
+      gridWrapper.style.overflow = 'visible';
+    }
   }
 
   private _render = () => {
+    if (!this.config) return;
+
     render(
       (
         <>
           <ha-card style={{
-            margin: `-${this.config.negative_margin || 13}px 0`,
+            margin: `-${this.config.negative_margin || DEFAULT_CONFIG.negative_margin}px 0`,
             borderWidth: '0px',
             maxHeight: '0px',
             height: '0px',
+            minHeight: '0px',
+            overflow: 'visible',
             transform: 'scale(0)',
           } as JSXInternal.CSSProperties}
           />
@@ -205,7 +283,11 @@ class AnchorCard extends HTMLElement {
   };
 
   getCardSize() {
-    return 1;
+    return 0;
+  }
+
+  getGridOptions() {
+    return { columns: 1, rows: 0 };
   }
 }
 
