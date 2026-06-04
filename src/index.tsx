@@ -5,7 +5,6 @@
 /* eslint-disable no-underscore-dangle */
 // import { HomeAssistant } from 'custom-card-helpers';
 import { createRef, render } from 'preact';
-import { JSXInternal } from 'preact/src/jsx';
 import { Config } from 'types';
 import { HomeAssistant } from 'custom-card-helpers';
 import FormComponent from 'FormComponent';
@@ -335,7 +334,7 @@ class AnchorCard extends HTMLElement {
             overflow: 'hidden',
             opacity: '0.6',
             fontSize: '14px',
-          } as JSXInternal.CSSProperties}>
+          }}>
             <AnchorIcon />
             <span>{this.config.anchor_id}</span>
           </ha-card>
@@ -353,7 +352,7 @@ class AnchorCard extends HTMLElement {
               minHeight: '0px',
               overflow: 'visible',
               transform: 'scale(0)',
-            } as JSXInternal.CSSProperties}
+            }}
             />
           </>
         ), this,
@@ -372,6 +371,7 @@ class AnchorCard extends HTMLElement {
 
 class AnchorCardEditor extends HTMLElement {
 
+  // @ts-ignore set outside constructor
   private _config: Config;
 
   private _hass?: HomeAssistant;
@@ -389,23 +389,21 @@ class AnchorCardEditor extends HTMLElement {
       config.timeout === undefined ||
       config.offset === undefined ||
       config.transition === undefined ||
-      // @ts-ignore
+      // @ts-ignore depricated
       config.backout !== undefined ||
-      // @ts-ignore
+      // @ts-ignore depricated
       config.disable_in_edit_mode !== undefined
     ) {
       // @ts-ignore
       if (config.backout !== undefined) this.usedBackoutBefore = true;
       config = {
-        anchor_id: 'example',
         negative_margin: 13,
         timeout: 50,
         offset: 0,
         transition: 0,
         ...config,
-        // @ts-ignore
+        // @ts-ignore depricated
         backout: undefined,
-        // @ts-ignore
         disable_in_edit_mode: undefined,
       }
       const event = new CustomEvent("config-changed", {
@@ -488,8 +486,6 @@ class AnchorCardEditor extends HTMLElement {
         </span></div>
       </div>
       <FormComponent
-        // hass={this._hass}
-        // config={this._config}
         schema={[
           {name: 'anchor_id', selector: { text: {} }},
           {name: 'negative_margin', selector: { number: { min: -100, max: 100, step: 5 } }},
@@ -525,7 +521,6 @@ customElements.define(parentCardName, AnchorCard);
 customElements.define(configCardName, AnchorCardEditor);
 
 declare global {
-  // eslint-disable-next-line no-unused-vars
   interface Window {
     customCards?: any[];
   }

@@ -8,7 +8,7 @@ export const HassContext = createContext<HomeAssistant | undefined>(undefined);
 export const ConfigContext = createContext<Config | undefined>(undefined);
 
 interface HassProviderProps {
-  hass: HomeAssistant;
+  hass: HomeAssistant | undefined;
   children: h.JSX.Element | h.JSX.Element[];
 }
 
